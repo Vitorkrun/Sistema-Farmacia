@@ -4,7 +4,7 @@ FARMAESTOQUE - como usar
 2. Descompacte esta pasta.
 3. Windows: dois cliques em iniciar.bat | Linux/Mac: ./iniciar.sh
 4. O navegador abre em http://127.0.0.1:8000
-5. No primeiro acesso, crie o usuario administrador (senha com no minimo 4 caracteres).
+5. No primeiro acesso, crie o usuario administrador (e-mail obrigatorio + senha com no minimo 4 caracteres).
 6. Para parar: feche a janela preta ou aperte Ctrl+C.
 
 PRIMEIROS PASSOS
@@ -23,3 +23,16 @@ O cupom e NAO FISCAL (nao substitui nota fiscal).
 Os dados ficam em farmacia.db (criado automaticamente). Para backup, copie esse arquivo.
 Outros aparelhos da rede: Windows (PowerShell): $env:HOST="0.0.0.0"; python servidor.py
                           Linux/Mac: HOST=0.0.0.0 python3 servidor.py  -> http://IP-DO-COMPUTADOR:8000
+
+CONFIGURACOES (somente administrador)
+- Abas: Loja | PIX | Tela de login | E-mail e recuperacao de senha.
+- Tela de login: fundo (imagem, cor, escurecer, desfocar), cartao (logo, cores, tamanho, posicao) e todos os textos, com pre-visualizacao ao vivo.
+- Operadores nao veem o menu Configuracoes e o servidor tambem bloqueia.
+
+RECUPERAR SENHA
+- Na tela de login: "Esqueci minha senha" > informe o e-mail de um ADMINISTRADOR > recebe um codigo de 6 digitos (vale 15 min).
+- So e-mail de administrador funciona. Cadastre/edite e-mails em Usuarios.
+- Para o codigo chegar por e-mail, preencha o SMTP em Configuracoes > E-mail (Gmail: smtp.gmail.com, porta 465, SSL, "senha de app").
+- Sem SMTP configurado, o codigo aparece na janela preta do servidor.
+- Operador esqueceu a senha? Um administrador define em Usuarios > Nova senha.
+- Sem e-mail cadastrado em nenhum admin? Rode: python redefinir_senha.py
