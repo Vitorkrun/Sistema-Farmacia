@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FarmaEstoque</title>
+<style>
+:root{--bg:#EAF3FB;--card:#fff;--ink:#0F2A47;--mut:#5B7189;--line:#D3E2F1;--acc:#1565C0;--accd:#0A3D7A;--side:#0A2F5C;--pdv:#1B4F9C;--ok:#1B7F4B;--okbg:#DDF3E7;--warn:#9A5B00;--warnbg:#FFF0CC;--bad:#B3261E;--badbg:#FBE1DE}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+h1,h2{margin:0}h1{font-size:26px}h2{font-size:18px}.mut{color:var(--mut)}[hidden]{display:none!important}.r{text-align:right}
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--side);color:#DCEBFA;padding:20px 12px;display:flex;flex-direction:column;gap:3px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:20px;padding:0 8px 20px}
+aside button{all:unset;cursor:pointer;padding:10px 12px;border-radius:9px;color:#A9C4E2}aside button:hover{background:#ffffff18}aside button.on{background:#fff;color:var(--accd);font-weight:600}
+aside .sp{flex:1}.who{padding:8px 12px;font-size:13px;color:#8FB0D6}
+main{padding:28px;max-width:1150px;width:100%}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}.grid .card{margin:0;border-top:4px solid var(--acc)}.grid b{display:block;font-size:26px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}table{width:100%;border-collapse:collapse;font-size:14px}.wrap{overflow-x:auto}
+th{text-align:left;color:var(--mut);padding:8px;border-bottom:2px solid var(--line);white-space:nowrap}td{padding:9px 8px;border-bottom:1px solid var(--line)}tbody tr:hover{background:#F2F8FE}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}
+input,select{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%}input:focus,select:focus,.btn:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+label{display:block;font-weight:500;font-size:13px;color:var(--mut)}label input,label select{margin-top:4px}
+.btn{font:inherit;font-weight:600;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 15px}.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.pri:hover{background:var(--accd)}.btn.sm{padding:4px 10px;font-size:13px}.btn.del{color:var(--bad)}
+.bar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}.bar input{flex:1;min-width:200px}.bar select{width:auto}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end}.empty{text-align:center;padding:26px;color:var(--mut)}
+dialog{border:1px solid var(--line);border-radius:16px;padding:22px;background:#fff;color:var(--ink);width:min(560px,94vw);box-shadow:0 20px 40px #0004}dialog::backdrop{background:#06203f99}
+
+/* LOGIN */
+#login{min-height:100vh}
+.lroot{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 18px 56px;overflow:hidden}
+.lroot.prev{min-height:0;height:100%;padding:16px 16px 40px;pointer-events:none}
+.lroot.pos-esquerda{align-items:flex-start;padding-left:min(8vw,90px)}.lroot.pos-direita{align-items:flex-end;padding-right:min(8vw,90px)}
+.lbg{position:absolute;inset:-24px;background-size:cover;background-position:center}.lov{position:absolute;inset:0;background:#000;pointer-events:none}
+.lcard{position:relative;width:min(var(--lc-largura),100%);background:var(--lc-cartao);color:var(--lc-texto);border-radius:var(--lc-raio);padding:30px 28px;box-shadow:0 14px 44px #0006;display:grid;gap:14px}
+.lcl{text-align:center}.llogo-t{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:22px}
+.lcard h2{font-size:26px;text-align:center}.lsub{margin:-6px 0 0;text-align:center;opacity:.75;font-size:14px}
+.lcard label{color:var(--lc-texto);opacity:.9;font-weight:600}.lcard input{background:#EEF3FB;border-color:#C9D6E8;color:#0F2A47;padding:11px 12px}
+.lbtn{font:inherit;font-weight:600;border:0;cursor:pointer;background:var(--lc-botao);color:#fff;border-radius:max(calc(var(--lc-raio) - 4px),0px);padding:12px}.lbtn:hover{filter:brightness(.92)}
+.llink{color:var(--lc-botao);font-size:13px;text-align:center;cursor:pointer;text-decoration:underline}
+.lfoot{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:var(--lc-rodape);font-size:13px;padding:0 16px}
+#lprev{position:relative;height:500px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.tabs button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mut);border-radius:9px;padding:8px 14px;font-weight:600}.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.fimg{display:grid;gap:6px;align-content:start}.fprev{background:#F2F6FB;border:1px dashed var(--line);border-radius:9px;padding:8px;min-height:60px;display:flex;align-items:center;justify-content:center}.fprev img{max-height:80px;max-width:100%}
+.card h2{margin-bottom:2px}
+
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--accd);color:#fff;padding:12px 22px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:999}#toast.on{opacity:1}
+/* PDV */
+#pdv{position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;padding:10px 22px 8px;gap:10px}
+.ph{display:flex;justify-content:space-between;align-items:center;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:6px}.ph .x{all:unset;cursor:pointer;color:var(--mut);font-size:13px}
+.pname{background:var(--pdv);color:#fff;font-size:30px;font-weight:700;padding:10px 22px;border-radius:10px;text-transform:uppercase;min-height:62px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm{flex:1;display:grid;grid-template-columns:330px 1fr;gap:20px;min-height:0}.pl{display:flex;flex-direction:column;gap:6px}
+.logo{height:150px;border-radius:24px;background:#fff;box-shadow:0 4px 18px #1b4f9c33;display:flex;align-items:center;justify-content:center;gap:15px;font-weight:800;color:var(--pdv);font-size:26px;margin-bottom:6px;overflow:hidden;padding:10px;}
+.logo img{max-width:100%; max-height:100%; object-fit:contain;}
+.logo-text { font-size: 22px; line-height: 1.2; text-align: left; color: var(--pdv); text-transform: uppercase;}
+.pl label{font-weight:700;color:#333;font-size:13px;margin-top:2px}.pl input,.disp{background:#EEF1F5;border:1px solid #C9D1DC;border-radius:6px;padding:8px 10px;font-size:20px;font-weight:600;text-align:right;width:100%;min-height:42px}
+#pc{text-align:left;background:#fff;border:2px solid var(--pdv)}
+.tb{border:1px solid #bcc7d6;border-radius:6px;overflow:auto;min-height:0}.tb table{font-size:14px}.tb th{background:#F0F4F9;position:sticky;top:0;font-size:12px}.tb tr.sel{background:#D6E6FA}.tb td{padding:7px 8px}
+.pb{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:end}.cx{background:var(--pdv);color:#fff;border-radius:8px;font-size:38px;font-weight:700;text-align:center;padding:14px}
+.sub{font-size:22px;font-weight:700;text-align:right}.st{background:var(--pdv);color:#fff;border-radius:8px;font-size:44px;font-weight:700;text-align:center;padding:10px}
+.keys{display:flex;flex-wrap:wrap;gap:4px 22px;font-size:12px;color:#444}.keys b{color:var(--pdv)}
+.pay{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pay label{cursor:pointer;text-align:center;border:2px solid var(--line);border-radius:10px;padding:10px 4px;color:var(--ink);font-weight:600;margin:0}.pay input{display:none}.pay label:has(input:checked){border-color:var(--acc);background:#E5F0FD;color:var(--accd)}
+.big{background:var(--bg);padding:14px;border-radius:10px;text-align:center;font-size:34px;font-weight:700;color:var(--accd)}
+#qr{display:block;margin:10px auto;width:260px;height:260px;image-rendering:pixelated}.cp{font:12px monospace;word-break:break-all;background:var(--bg);padding:8px;border-radius:8px}
+@media print{body>*:not(#cupom){display:none!important}#cupom{display:block!important;font:12px monospace;width:280px}}
+@media(max-width:860px){#app,#login,.pm,.cols{grid-template-columns:1fr}aside{flex-direction:row;flex-wrap:wrap}.pname{font-size:20px}}
+</style></head><body>
+<div id="login" hidden></div>
+<div id="app" hidden><aside><div class="brand" id="lg1"></div>
+<button data-v="painel">Painel</button><button id="bp">PDV / Caixa</button><button data-v="produtos">Produtos</button><button data-v="vendas">Vendas</button><button data-v="config">Configurações</button><button data-v="usuarios">Usuários</button>
+<div class="sp"></div><button id="out">Sair</button><div class="who" id="who"></div></aside><main id="main"></main></div>
+<div id="pdv" hidden></div><div id="cupom" hidden></div><dialog id="dlg"></dialog><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),n3=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+const dt=s=>new Date(s.replace(' ','T')).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+const FP={dinheiro:'Dinheiro',pix:'PIX',debito:'Cartão débito',credito:'Cartão crédito'};
+const LOGO_ICON='<svg width="30" height="30" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="9" fill="#fff"/><path d="M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z" fill="#1565C0"/></svg>';
+let ME=null,P=[],CFG={},tt,CART=[],SEL=-1,LAST=null,TIMER;
+
+function atualizarLogoMenu() {
+    const nomeLoja = CFG.loja || 'FarmaEstoque';
+    const logoHtml = CFG.logo ? `<img src="${CFG.logo}" style="max-height:30px; border-radius:4px; margin-right:5px;">` : LOGO_ICON;
+    $('#lg1').innerHTML = logoHtml + nomeLoja;
+    document.title = nomeLoja;
+}
+
+function salvarCarrinho(){localStorage.setItem('carrinho_salvo', JSON.stringify(CART))}
+function carregarCarrinho(){try{const c=localStorage.getItem('carrinho_salvo');if(c){CART=JSON.parse(c);if(CART.length>0)SEL=0;draw();}}catch(e){}}
+
+function toast(t){const e=$('#toast');e.textContent=t;e.className='on';clearTimeout(tt);tt=setTimeout(()=>e.className='',3200)}
+async function api(path,o={}){const r=await fetch('/api/'+path,{method:o.m||'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(sessionStorage.getItem('t')||'')},body:o.b?JSON.stringify(o.b):undefined});
+ const d=await r.json().catch(()=>({}));if(r.status===401&&!/^(login|primeiro|recuperar)/.test(path)){if(ME)sair();else sessionStorage.removeItem('t');throw new Error(d.erro)}if(!r.ok)throw new Error(d.erro||'Erro inesperado.');return d}
+async function run(fn,ok){try{await fn();if(ok)toast(ok)}catch(e){toast(e.message)}}
+const venc=p=>p.validade&&p.validade<new Date().toISOString().slice(0,10);
+
+async function boot(){
+    try { CFG=await api('config'); } catch(e){}
+    if(sessionStorage.getItem('t')){try{ME=await api('me');return entrar()}catch(e){}}
+    try{login((await api('status')).primeiro_acesso)}catch(e){document.body.innerHTML='<p style="padding:30px">Não foi possível falar com o servidor. Abra http://127.0.0.1:8000 com o servidor rodando.</p>'}
+}
+
+/* ---------- LOGIN (visual 100% editável em Configurações > Tela de login) ---------- */
+const LDEF={login_titulo:'Entrar',login_subtitulo:'Acesse com seu usuário ou e-mail',login_rotulo_usuario:'Usuário ou e-mail',login_rotulo_senha:'Senha',login_botao:'Entrar',login_cor_botao:'#1565C0',login_cor_cartao:'#FFFFFF',login_cor_texto:'#0F2A47',login_cor_rodape:'#FFFFFF',login_raio:'10',login_largura:'400',login_posicao:'centro',login_mostrar_recuperar:'1',login_texto_recuperar:'Esqueci minha senha',login_escurecer:'0',login_desfoque:'0',login_logo_tam:'48',login_rodape:''};
+const LV=(c,k)=>(c[k]!==undefined&&c[k]!==null&&c[k]!=='')?c[k]:LDEF[k];
+const cor=(v,d)=>/^#[0-9a-f]{6}$/i.test(v||'')?v:d;
+const nlim=(v,a,b,d)=>{v=Number(v);return isFinite(v)?Math.min(b,Math.max(a,v)):d};
+const imgOk=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(v||'');
+let LMODO='login',LINFO='',LEMAIL='';
+function loginHTML(c,modo,prev){
+  const nome=c.loja||'FarmaEstoque',logo=imgOk(c.login_logo)?c.login_logo:(imgOk(c.logo)?c.logo:''),bgc=cor(c.login_cor_fundo,''),fundo=imgOk(c.login_fundo)?c.login_fundo:'';
+  const pos=['esquerda','direita'].includes(LV(c,'login_posicao'))?LV(c,'login_posicao'):'centro';
+  const vars=`--lc-botao:${cor(LV(c,'login_cor_botao'),'#1565C0')};--lc-cartao:${cor(LV(c,'login_cor_cartao'),'#FFFFFF')};--lc-texto:${cor(LV(c,'login_cor_texto'),'#0F2A47')};--lc-raio:${nlim(LV(c,'login_raio'),0,40,10)}px;--lc-largura:${nlim(LV(c,'login_largura'),300,600,400)}px;--lc-rodape:${cor(LV(c,'login_cor_rodape'),'#FFFFFF')}`;
+  const bg=bgc||'linear-gradient(160deg,#1565C0,#0A2F5C)',blur=nlim(LV(c,'login_desfoque'),0,20,0),esc_=nlim(LV(c,'login_escurecer'),0,90,0);
+  const logoHtml=logo?`<img src="${esc(logo)}" alt="" style="max-height:${nlim(LV(c,'login_logo_tam'),20,160,48)}px;max-width:100%">`
+    :`<span class="llogo-t">${LOGO_ICON.replace(/width="30" height="30"/,'width="38" height="38"').replace('fill="#1565C0"','style="fill:var(--lc-botao)"')}${esc(nome)}</span>`;
+  const inp=(l,n,t,ex)=>`<label>${esc(l)}<input name="${n}" type="${t||'text'}" ${prev?'disabled':'required'} ${ex||''}></label>`;
+  const voltar=`<a class="llink" ${prev?'':'href="#" onclick="mostrarLogin(\'login\');return false"'}>← Voltar ao login</a>`;
+  let h2,sub,campos,btn,extra='';
+  if(modo==='primeiro'){h2='Criar administrador';sub='Primeiro acesso: cadastre o administrador do sistema.';campos=inp('Usuário','nome')+inp('E-mail (usado para recuperar a senha)','email','email')+inp('Senha (mín. 4 caracteres)','senha','password','minlength="4"');btn='Criar e entrar'}
+  else if(modo==='rec1'){h2='Recuperar senha';sub='Informe o e-mail de um administrador. Enviaremos um código de 6 dígitos.';campos=inp('E-mail do administrador','email','email');btn='Enviar código';extra=voltar}
+  else if(modo==='rec2'){h2='Nova senha';sub=prev?'Digite o código enviado ao e-mail e escolha a nova senha.':LINFO;campos=inp('Código recebido','codigo','text','inputmode="numeric" maxlength="6" autocomplete="one-time-code"')+inp('Nova senha (mín. 4 caracteres)','senha','password','minlength="4"')+inp('Repita a nova senha','senha2','password');btn='Redefinir senha';extra=voltar}
+  else{h2=LV(c,'login_titulo');sub=LV(c,'login_subtitulo');campos=inp(LV(c,'login_rotulo_usuario'),'nome','text','autocomplete="username"')+inp(LV(c,'login_rotulo_senha'),'senha','password','autocomplete="current-password"');btn=LV(c,'login_botao');
+    if(LV(c,'login_mostrar_recuperar')!=='0')extra=`<a class="llink" ${prev?'':'href="#" onclick="mostrarLogin(\'rec1\');return false"'}>${esc(LV(c,'login_texto_recuperar'))}</a>`}
+  const tag=prev?'div':'form',rod=LV(c,'login_rodape');
+  return `<div class="lroot pos-${pos}${prev?' prev':''}" style="${vars};background:${bg}">${fundo?`<div class="lbg" style="background-image:url('${fundo}');${blur?`filter:blur(${blur}px)`:''}"></div>`:''}<div class="lov" style="opacity:${esc_/100}"></div>
+  <${tag} ${prev?'':'id="lf"'} class="lcard"><div class="lcl">${logoHtml}</div><h2>${esc(h2)}</h2>${sub?`<p class="lsub">${esc(sub)}</p>`:''}${campos}<button class="lbtn" ${prev?'type="button"':''}>${esc(btn)}</button>${extra}</${tag}>
+  ${rod?`<div class="lfoot">${esc(rod)}</div>`:''}</div>`}
+function login(first){$('#app').hidden=true;$('#login').hidden=false;mostrarLogin(first?'primeiro':'login')}
+function mostrarLogin(m){LMODO=m;$('#login').innerHTML=loginHTML(CFG,m,false);document.title=CFG.loja||'FarmaEstoque';const f=$('#lf');f.onsubmit=submitLogin;const i=f.querySelector('input');if(i)i.focus()}
+async function submitLogin(e){e.preventDefault();const d=Object.fromEntries(new FormData(e.target));d.nome=(d.nome||'').trim();
+  try{
+    if(LMODO==='rec1'){const r=await api('recuperar/solicitar',{m:'POST',b:{email:d.email}});LEMAIL=(d.email||'').trim();
+      LINFO=r.console?'Este servidor ainda não tem e-mail configurado: o código aparece na janela preta do servidor.':'Se o e-mail for de um administrador, enviamos um código (vale 15 minutos). Veja também a caixa de spam.';return mostrarLogin('rec2')}
+    if(LMODO==='rec2'){if(d.senha!==d.senha2)return toast('As senhas não conferem.');await api('recuperar/confirmar',{m:'POST',b:{email:LEMAIL,codigo:d.codigo,senha:d.senha}});toast('Senha redefinida. Entre com a nova senha.');return mostrarLogin('login')}
+    const r=await api(LMODO==='primeiro'?'primeiro-usuario':'login',{m:'POST',b:d});sessionStorage.setItem('t',r.token);ME=r.usuario;entrar()
+  }catch(err){toast(err.message||'Erro ao entrar.')}}
+
+async function entrar(){$('#login').hidden=true;$('#app').hidden=false;$('#who').textContent=ME.nome+' ('+ME.perfil+')';const adm=ME.perfil==='admin';document.querySelectorAll('aside [data-v="config"]').forEach(b=>b.hidden=!adm);try{CFG=await api('config');atualizarLogoMenu()}catch(e){}go('painel');if(adm&&!ME.email)setTimeout(()=>toast('Cadastre seu e-mail em Usuários para poder recuperar a senha.'),900)}
+function sair(){sessionStorage.removeItem('t');ME=null;CART=[];localStorage.removeItem('carrinho_salvo');$('#pdv').hidden=true;boot()}
+$('#out').onclick=sair;$('#bp').onclick=()=>abrirPDV();document.querySelectorAll('aside [data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v));
+const V={painel:vPainel,produtos:vProdutos,vendas:vVendas,relatorios:vRelatorios,config:vConfig,usuarios:vUsuarios};
+async function go(v){
+    if(v==='config'&&ME.perfil!=='admin')return toast('Somente administradores acessam as configurações.');
+    const menuActive = (v === 'relatorios') ? 'vendas' : v;
+    document.querySelectorAll('aside [data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===menuActive));
+    try{$('#main').innerHTML=await V[v]();scrollTo(0,0);({produtos:linhas,vendas:ligarVendas,relatorios:ligarRelatorios,config:ligarCfg,usuarios:ligarUsers})[v]?.()}catch(e){toast(e.message)}
+}
+async function vPainel(){const r=await api('resumo');
+ const li=(L,f)=>L.length?`<table>${L.map(f).join('')}</table>`:'<div class="empty">Nada por aqui. 👍</div>';
+ return `<div class="top"><div><h1>Painel</h1><span class="mut">Resumo da farmácia hoje</span></div><button class="btn pri" onclick="abrirPDV()">Abrir caixa (PDV)</button></div>
+ <div class="grid"><div class="card"><span class="mut">Vendas hoje</span><b>${brl(r.vendas_hoje)}</b><span class="mut">${r.n_hoje} venda(s)</span></div><div class="card"><span class="mut">Produtos cadastrados</span><b>${r.produtos}</b></div>
+ <div class="card"><span class="mut">Estoque a preço de custo</span><b>${brl(r.custo)}</b></div></div>
+ <div class="cols"><div class="card"><h2 style="margin-bottom:8px">Estoque baixo</h2>${li(r.baixos,p=>`<tr><td>${esc(p.nome)}</td><td class="r"><span class="tag ${p.estoque_atual?'warn':'bad'}">${p.estoque_atual} un</span></td></tr>`)}</div>
+ <div class="card"><h2 style="margin-bottom:8px">Vencidos / vencendo em 90 dias</h2>${li(r.vencendo,p=>`<tr><td>${esc(p.nome)}</td><td class="r"><span class="tag ${p.validade<r.hoje?'bad':'warn'}">${p.validade.split('-').reverse().join('/')}</span></td></tr>`)}</div></div>`}
+async function vProdutos(){P=await api('produtos');
+ return `<div class="top"><div><h1>Produtos</h1><span class="mut">Cadastro, estoque e validade</span></div><div>${ME.perfil==='admin'&&!P.length?'<button class="btn" onclick="exemplo()">Carregar exemplos</button> ':''}<button class="btn pri" onclick="fProd()">Novo produto</button></div></div>
+ <div class="card"><div class="bar"><input id="q" placeholder="Buscar por nome ou código de barras" autocomplete="off"></div><div class="wrap"><table><thead><tr><th>Produto</th><th>Código</th><th class="r">Venda</th><th class="r">Estoque</th><th>Validade</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></div>`}
+function linhas(){const q=$('#q'),draw=()=>{const t=q.value.toLowerCase();const L=P.filter(p=>!t||p.nome.toLowerCase().includes(t)||(p.codigo_barras||'').includes(t));
+ $('#rows').innerHTML=L.length?L.map(p=>`<tr><td><b>${esc(p.nome)}</b> ${p.receita?'<span class="tag warn">receita</span>':''}<br><span class="mut">${esc(p.categoria||'')} ${esc(p.laboratorio||'')}</span></td><td class="mut">${esc(p.codigo_barras||'-')}</td><td class="r">${brl(p.preco_venda)}</td>
+ <td class="r"><span class="tag ${p.estoque_atual<=0?'bad':p.estoque_atual<=p.estoque_minimo?'warn':'ok'}">${p.estoque_atual}</span></td><td>${p.validade?`<span class="tag ${venc(p)?'bad':'ok'}">${p.validade.split('-').reverse().join('/')}</span>`:'-'}</td>
+ <td class="r" style="white-space:nowrap"><button class="btn sm" onclick="fProd(${p.id})">Editar</button>${ME.perfil==='admin'?` <button class="btn sm del" onclick="delProd(${p.id})">Excluir</button>`:''}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum produto.</td></tr>'};q.oninput=draw;draw()}
+function exemplo(){run(async()=>{await api('produtos/exemplo',{m:'POST'});go('produtos')},'Produtos de exemplo carregados.')}
+function fProd(id){const p=id?P.find(x=>x.id===id):{nome:'',codigo_barras:'',categoria:'',laboratorio:'',validade:'',receita:0,preco_compra:'',preco_venda:'',estoque_atual:0,estoque_minimo:5},d=$('#dlg');
+ d.innerHTML=`<form id="pf" style="display:grid;gap:12px"><h2>${id?'Editar':'Novo'} produto</h2><label>Nome<input name="nome" required value="${esc(p.nome)}"></label>
+ <div class="form"><label>Código de barras<input name="codigo_barras" value="${esc(p.codigo_barras)}"></label><label>Categoria<input name="categoria" value="${esc(p.categoria)}" placeholder="Medicamentos, Higiene..."></label><label>Laboratório<input name="laboratorio" value="${esc(p.laboratorio)}"></label><label>Validade<input name="validade" type="date" value="${esc(p.validade)}"></label></div>
+ <div class="form"><label>Preço de compra<input name="preco_compra" type="number" step="0.01" min="0" required value="${p.preco_compra}"></label><label>Preço de venda<input name="preco_venda" type="number" step="0.01" min="0" required value="${p.preco_venda}"></label><label>Estoque atual<input name="estoque_atual" type="number" min="0" required value="${p.estoque_atual}"></label><label>Estoque mínimo<input name="estoque_minimo" type="number" min="0" required value="${p.estoque_minimo}"></label></div>
+ <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="receita" style="width:auto" ${p.receita?'checked':''}> Exige receita (tarja vermelha/preta)</label>
+ <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" onclick="$('#dlg').close()">Cancelar</button><button class="btn pri">Salvar</button></div></form>`;d.showModal();
+ $('#pf').onsubmit=e=>{e.preventDefault();const b=Object.fromEntries(new FormData(e.target));b.receita=e.target.receita.checked?1:0;run(async()=>{await api('produtos'+(id?'/'+id:''),{m:id?'PUT':'POST',b});d.close();go('produtos')},'Produto salvo.')}}
+function delProd(id){if(confirm('Excluir este produto?'))run(async()=>{await api('produtos/'+id,{m:'DELETE'});go('produtos')},'Produto excluído.')}
+
+async function vVendas(){
+    const h=new Date().toISOString().slice(0,10);
+    return `<div class="top">
+        <div><h1>Vendas</h1><span class="mut">Faturamento, lucro e formas de pagamento</span></div>
+        <button class="btn pri" onclick="go('relatorios')">Ver Relatório Completo</button>
+    </div>
+    <div class="card"><div class="bar"><label style="flex:1">De<input type="date" id="vi" value="${h.slice(0,8)}01"></label><label style="flex:1">Até<input type="date" id="vf" value="${h}"></label><button class="btn pri" id="vb" style="align-self:flex-end">Filtrar</button></div></div><div id="vr"></div>`
+}
+function ligarVendas(){const f=()=>run(async()=>{const r=await api(`vendas?ini=${$('#vi').value}&fim=${$('#vf').value}`);
+ $('#vr').innerHTML=`<div class="grid"><div class="card"><span class="mut">Faturamento</span><b>${brl(r.total)}</b></div><div class="card"><span class="mut">Lucro bruto</span><b>${brl(r.lucro)}</b></div><div class="card"><span class="mut">Vendas</span><b>${r.n}</b></div>
+ ${Object.keys(FP).map(k=>`<div class="card"><span class="mut">${FP[k]}</span><b>${brl(r.por_forma[k])}</b></div>`).join('')}</div>
+ <div class="card wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Operador</th><th>Pagamento</th><th class="r">Total</th></tr></thead><tbody>${r.vendas.map(v=>`<tr style="cursor:pointer" title="Clique para ver os detalhes" onclick="abrirDetalheVenda(${v.id})"><td>${v.id}</td><td class="mut">${dt(v.data)}</td><td>${esc(v.operador)}</td><td>${FP[v.forma]}</td><td class="r"><b>${brl(v.total)}</b></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nenhuma venda no período.</td></tr>'}</tbody></table></div>`});$('#vb').onclick=f;f()}
+
+async function abrirDetalheVenda(id) {
+    const d = $('#dlg');
+    d.innerHTML = '<div class="empty">Carregando detalhes...</div>';
+    d.showModal();
+    try {
+        const r = await api('venda/' + id);
+        const v = r.venda, itens = r.itens;
+        
+        $('#cupom').innerHTML = `
+            <div style="text-align:center">
+                <b>${esc(CFG.loja || 'FARMÁCIA')}</b><br>
+                *** CUPOM NÃO FISCAL ***
+            </div>
+            ${dt(v.data)} · Venda ${v.id}<br>
+            Atendente: ${esc(v.operador)}<br>
+            Pagamento: ${FP[v.forma]}<hr>
+            ${itens.map(i => `${esc(i.nome)}<br>&nbsp;${i.qtd} x ${brl(i.preco)} = ${brl(i.preco * i.qtd)}<br>`).join('')}
+            <hr><b>TOTAL ${brl(v.total)}</b><br>
+            ${v.forma === 'dinheiro' ? `Recebido ${brl(v.pago)} · Troco ${brl(v.troco)}<hr>` : ''}
+            Obrigado pela preferência!
+        `;
+
+        d.innerHTML = `
+            <div style="font-family: monospace; font-size: 13px; line-height: 1.4; color: #333;">
+                <div style="text-align:center; margin-bottom: 12px;">
+                    <div style="font-size: 16px; font-weight: bold; color: #0F2A47;">${esc(CFG.loja || 'FARMÁCIA')}</div>
+                    <div style="font-size: 11px; color: #666;">*** CUPOM NÃO FISCAL ***</div>
+                </div>
+                
+                <div style="border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 6px 0; margin-bottom: 8px; font-size: 12px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Venda:</span> <b>${v.id}</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Data:</span> <b>${dt(v.data)}</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Operador:</span> <b>${esc(v.operador)}</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Pagamento:</span> <b>${FP[v.forma]}</b></div>
+                </div>
+
+                <table style="width: 100%; font-size: 12px; margin-bottom: 8px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <th style="text-align:left; padding-bottom:4px;">Produto</th>
+                            <th style="text-align:center; padding-bottom:4px;">Qtd</th>
+                            <th style="text-align:right; padding-bottom:4px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itens.map(i => `
+                            <tr>
+                                <td style="padding: 4px 0;">${esc(i.nome)}</td>
+                                <td style="text-align:center; padding: 4px 0;">${i.qtd}</td>
+                                <td style="text-align:right; padding: 4px 0;">${brl(i.preco * i.qtd)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div style="border-top: 1px dashed #ccc; padding-top: 6px; margin-top: 6px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size: 15px; color: #0F2A47;">
+                        <span>TOTAL</span>
+                        <span>${brl(v.total)}</span>
+                    </div>
+                    ${v.forma === 'dinheiro' ? `
+                        <div style="display:flex; justify-content:space-between; font-size: 12px; color: #555; margin-top: 4px;">
+                            <span>Valor Recebido</span>
+                            <span>${brl(v.pago)}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size: 12px; color: #555;">
+                            <span>Troco</span>
+                            <span>${brl(v.troco)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:space-between; margin-top:20px;">
+                <button class="btn" onclick="window.print()">Imprimir Cupom</button>
+                <button class="btn pri" onclick="$('#dlg').close()">Fechar</button>
+            </div>
+        `;
+    } catch(e) {
+        d.innerHTML = `<div class="empty">Erro: ${e.message}</div><div class="r" style="margin-top:10px"><button class="btn" onclick="$('#dlg').close()">Fechar</button></div>`;
+    }
+}
+
+/* ---------- RELATÓRIOS ---------- */
+async function vRelatorios(){
+    const h=new Date().toISOString().slice(0,10);
+    return `<div class="top">
+        <div><h1>Relatórios</h1><span class="mut">Exportação e análise de vendas</span></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" onclick="go('vendas')">Voltar para Vendas</button>
+            <button class="btn pri" id="btn-export" style="display:none;">Exportar CSV</button>
+        </div>
+    </div>
+    <div class="card"><div class="bar">
+        <label style="flex:1">De<input type="date" id="ri" value="${h.slice(0,8)}01"></label>
+        <label style="flex:1">Até<input type="date" id="rf" value="${h}"></label>
+        <button class="btn pri" id="rb" style="align-self:flex-end">Gerar Relatório</button>
+    </div></div><div id="res_relatorio"></div>`;
+}
+
+function ligarRelatorios(){
+    const f=()=>run(async()=>{
+        const ini = $('#ri').value, fim = $('#rf').value;
+        const r = await api(`vendas?ini=${ini}&fim=${fim}`);
+        
+        let html = `<div class="grid">
+            <div class="card"><span class="mut">Total Vendido</span><b>${brl(r.total)}</b></div>
+            <div class="card"><span class="mut">Lucro Bruto</span><b>${brl(r.lucro)}</b></div>
+            <div class="card"><span class="mut">Qtd. Vendas</span><b>${r.n}</b></div>
+        </div>`;
+
+        if(r.n > 0) {
+            $('#btn-export').style.display = 'inline-block';
+            $('#btn-export').onclick = () => {
+                let csv = "ID;Data;Operador;Pagamento;Total\n";
+                r.vendas.forEach(v => {
+                    csv += `${v.id};${dt(v.data)};${v.operador};${FP[v.forma]};${v.total.toFixed(2).replace('.',',')}\n`;
+                });
+                const blob = new Blob(["\uFEFF"+csv], {type: 'text/csv;charset=utf-8;'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `relatorio_vendas_${ini}_a_${fim}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            html += `<div class="card wrap">
+                <table>
+                    <thead><tr><th>Nº</th><th>Data</th><th>Operador</th><th>Pagamento</th><th class="r">Total</th></tr></thead>
+                    <tbody>
+                        ${r.vendas.map(v => `<tr><td>${v.id}</td><td class="mut">${dt(v.data)}</td><td>${esc(v.operador)}</td><td>${FP[v.forma]}</td><td class="r"><b>${brl(v.total)}</b></td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        } else {
+            $('#btn-export').style.display = 'none';
+            html += '<div class="empty">Nenhuma venda no período selecionado.</div>';
+        }
+
+        $('#res_relatorio').innerHTML = html;
+    });
+    $('#rb').onclick = f; f();
+}
+
+/* ---------- CONFIGURAÇÕES (só administrador) ---------- */
+const secao=(t,d,corpo)=>`<div class="card"><h2>${t}</h2><p class="mut" style="margin:2px 0 14px">${d}</p>${corpo}</div>`;
+const fTxt=(l,n,ex)=>`<label>${l}<input name="${n}" value="${esc(CFG[n]||'')}" ${ex||''}></label>`;
+const fCor=(l,n)=>`<label>${l}<input type="color" name="${n}" value="${cor(LV(CFG,n),'#000000')}" style="height:42px;padding:3px"></label>`;
+const fNum=(l,n,a,b,u)=>`<label>${l}: <b data-out="${n}">${LV(CFG,n)}</b> ${u}<input type="range" name="${n}" min="${a}" max="${b}" value="${LV(CFG,n)}" style="padding:0;height:30px"></label>`;
+const fSel=(l,n,o,v)=>`<label>${l}<select name="${n}">${o.map(([k,t])=>`<option value="${k}" ${String(v)===k?'selected':''}>${t}</option>`).join('')}</select></label>`;
+const fImg=(l,n,max,mime,dica)=>`<div class="fimg"><label>${l}<input type="file" accept="image/*" data-img="${n}" data-max="${max}" data-mime="${mime}"></label><input type="hidden" name="${n}" value="${esc(CFG[n]||'')}"><div class="fprev" data-prev="${n}">${CFG[n]?`<img src="${esc(CFG[n])}" alt="">`:'<span class="mut">Nenhuma imagem</span>'}</div>${dica?`<span class="mut" style="font-size:12px">${dica}</span>`:''}<button type="button" class="btn sm" data-rm="${n}">Remover imagem</button></div>`;
+const G2='class="form" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))"';
+function lerImg(file,max,mime,q){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=()=>no(new Error('Não foi possível ler a imagem.'));r.onload=e=>{const im=new Image();im.onerror=()=>no(new Error('Imagem inválida.'));im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),w=Math.round(im.width*s),h=Math.round(im.height*s),cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(im,0,0,w,h);ok(cv.toDataURL(mime,q))};im.src=e.target.result};r.readAsDataURL(file)})}
+const CPANES={loja:cpLoja,pix:cpPix,login:cpLogin,email:cpEmail};let CTAB='loja';
+async function vConfig(){CFG=await api('config');return `<div class="top"><div><h1>Configurações</h1><span class="mut">Visível somente para administradores</span></div></div>
+ <div class="tabs" id="ctabs">${[['loja','Loja'],['pix','PIX'],['login','Tela de login'],['email','E-mail e recuperação de senha']].map(([k,n])=>`<button data-t="${k}">${n}</button>`).join('')}</div><div id="cpane"></div>`}
+function ligarCfg(){document.querySelectorAll('#ctabs button').forEach(b=>b.onclick=()=>abrirAba(b.dataset.t));abrirAba(CTAB)}
+async function abrirAba(t){CTAB=t;document.querySelectorAll('#ctabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));try{$('#cpane').innerHTML=await CPANES[t]();ligarAba(t)}catch(e){toast(e.message)}}
+function setImg(n,v){const f=document.querySelector(`#cpane [name="${n}"]`);f.value=v;document.querySelector(`#cpane [data-prev="${n}"]`).innerHTML=v?`<img src="${v}" alt="">`:'<span class="mut">Nenhuma imagem</span>';f.form.dispatchEvent(new Event('input'))}
+function ligarAba(t){
+  document.querySelectorAll('#cpane [data-img]').forEach(i=>i.onchange=async()=>{const f=i.files[0];if(!f)return;try{setImg(i.dataset.img,await lerImg(f,+i.dataset.max,i.dataset.mime,.82))}catch(e){toast(e.message)}});
+  document.querySelectorAll('#cpane [data-rm]').forEach(b=>b.onclick=()=>setImg(b.dataset.rm,''));
+  document.querySelectorAll('#cpane form.cf').forEach(f=>{f.oninput=f.onchange=()=>{f.querySelectorAll('[data-out]').forEach(s=>s.textContent=f.elements[s.dataset.out].value);if(t==='login')previa()};f.onsubmit=ev=>{ev.preventDefault();salvarSecao(f)}});
+  if(t==='login'){$('#pmodo').onchange=previa;$('#lrestaurar').onclick=restaurarLogin;previa()}
+  if(t==='email')$('#teste_btn').onclick=()=>run(async()=>{await api('config/testar-email',{m:'POST',b:{para:$('#teste_para').value}})},'E-mail de teste enviado.');
+}
+function salvarSecao(f){run(async()=>{const d=Object.fromEntries(new FormData(f));if(f.dataset.sec==='login'&&d._fundo_tipo!=='solida')d.login_cor_fundo='';delete d._fundo_tipo;await api('config',{m:'POST',b:d});CFG=await api('config');atualizarLogoMenu()},'Configurações salvas.')}
+function previa(){const f=document.querySelector('#cpane form.cf');if(!f)return;const d=Object.fromEntries(new FormData(f));if(d._fundo_tipo!=='solida')d.login_cor_fundo='';$('#lprev').innerHTML=loginHTML({...CFG,...d},$('#pmodo').value,true)}
+function restaurarLogin(){if(!confirm('Voltar a tela de login ao visual padrão? (Loja e logo da loja não mudam.)'))return;run(async()=>{const b={login_fundo:'',login_cor_fundo:'',login_logo:''};Object.keys(LDEF).forEach(k=>b[k]='');await api('config',{m:'POST',b});await abrirAba('login')},'Visual padrão restaurado.')}
+async function cpLoja(){return `<form class="cf" data-sec="loja">${secao('Dados da loja','O nome e o logo aparecem no menu, no PDV, nos cupons e na tela de login (se você não definir um logo só para o login).',`<div ${G2}>${fTxt('Nome da farmácia','loja')}${fImg('Logo da loja','logo',400,'image/png')}</div>`)}<button class="btn pri">Salvar</button></form>`}
+async function cpPix(){return `<form class="cf" data-sec="pix">${secao('Recebimento por PIX','Usado para gerar o QR Code e o "copia e cola" no PDV.',`<div ${G2}>${fTxt('Chave PIX','pix_chave')}${fTxt('Nome do beneficiário (máx. 25)','pix_nome','maxlength="25"')}${fTxt('Cidade (máx. 15)','pix_cidade','maxlength="15"')}</div>`)}<button class="btn pri">Salvar</button></form>`}
+async function cpLogin(){
+  const solida=CFG.login_cor_fundo?'solida':'padrao';
+  return `<div class="card"><div class="bar" style="align-items:center;margin-bottom:10px"><h2 style="flex:1">Pré-visualização ao vivo</h2><select id="pmodo"><option value="login">Tela de entrada</option><option value="rec1">Recuperar senha — e-mail</option><option value="rec2">Recuperar senha — código</option><option value="primeiro">Primeiro acesso</option></select></div><div id="lprev"></div><p class="mut" style="margin:8px 0 0;font-size:13px">As alterações só valem para todos depois de clicar em Salvar.</p></div>
+  <form class="cf" data-sec="login">
+  ${secao('1. Fundo da página','Imagem, cor e efeitos atrás do cartão de login.',`<div ${G2}>${fImg('Imagem de fundo','login_fundo',1600,'image/jpeg','Dica: use imagem larga (1600 px).')}<div style="display:grid;gap:12px">${fSel('Quando não há imagem usar','_fundo_tipo',[['padrao','Degradê azul padrão'],['solida','Cor sólida']],solida)}${fCor('Cor sólida','login_cor_fundo')}${fNum('Escurecer fundo','login_escurecer',0,90,'%')}${fNum('Desfocar fundo','login_desfoque',0,20,'px')}</div></div>`)}
+  ${secao('2. Cartão de login','Caixa central com logo, campos e botão.',`<div ${G2}>${fImg('Logo do cartão','login_logo',400,'image/png','Se vazio, usa o logo da loja.')}<div style="display:grid;gap:12px">${fNum('Tamanho do logo','login_logo_tam',20,160,'px')}${fNum('Largura do cartão','login_largura',300,600,'px')}${fNum('Arredondamento','login_raio',0,40,'px')}${fSel('Posição do cartão','login_posicao',[['centro','Centro'],['esquerda','Esquerda'],['direita','Direita']],LV(CFG,'login_posicao'))}</div><div style="display:grid;gap:12px;align-content:start">${fCor('Cor do cartão','login_cor_cartao')}${fCor('Cor dos textos do cartão','login_cor_texto')}${fCor('Cor do botão e dos links','login_cor_botao')}</div></div>`)}
+  ${secao('3. Textos','Tudo que aparece escrito na tela. Campo em branco volta ao texto padrão.',`<div ${G2}>${fTxt('Título','login_titulo','placeholder="Entrar"')}${fTxt('Subtítulo','login_subtitulo','placeholder="Acesse com seu usuário ou e-mail"')}${fTxt('Nome do campo de usuário','login_rotulo_usuario','placeholder="Usuário ou e-mail"')}${fTxt('Nome do campo de senha','login_rotulo_senha','placeholder="Senha"')}${fTxt('Texto do botão','login_botao','placeholder="Entrar"')}${fSel('Mostrar link de recuperar senha','login_mostrar_recuperar',[['1','Sim'],['0','Não']],LV(CFG,'login_mostrar_recuperar'))}${fTxt('Texto do link de recuperar senha','login_texto_recuperar','placeholder="Esqueci minha senha"')}${fTxt('Rodapé (embaixo, sobre o fundo)','login_rodape','placeholder="ex.: www.minhafarmacia.com.br"')}${fCor('Cor do rodapé','login_cor_rodape')}</div>`)}
+  <div class="bar"><button class="btn pri">Salvar tela de login</button><button type="button" class="btn" id="lrestaurar">Restaurar visual padrão</button></div></form>`}
+async function cpEmail(){
+  const U=await api('usuarios'),ads=U.filter(u=>u.perfil==='admin'),com=ads.filter(u=>u.email);
+  return `<div class="card"><h2>Recuperação de senha</h2><p class="mut" style="margin:2px 0 12px">Na tela de login, "Esqueci minha senha" envia um código de 6 dígitos (vale 15 minutos) <b>somente para o e-mail de um administrador</b>. Operador que esquecer a senha pede a um administrador (Usuários → Nova senha).</p>
+   <span class="tag ${com.length?'ok':'bad'}">${com.length?com.length+' administrador(es) com e-mail cadastrado':'Nenhum administrador com e-mail — a recuperação não funciona'}</span>
+   <ul style="margin:10px 0 0;padding-left:20px">${ads.map(u=>`<li>${esc(u.nome)} — ${u.email?esc(u.email):'<span class="tag bad">sem e-mail</span>'}</li>`).join('')}</ul><p class="mut" style="margin:8px 0 0;font-size:13px">Cadastre ou altere os e-mails em Usuários.</p></div>
+  <form class="cf" data-sec="email">${secao('Servidor de e-mail (SMTP)','Necessário para o código chegar por e-mail. Sem isso, o código aparece na janela preta do servidor. Exemplo Gmail: smtp.gmail.com, porta 465, SSL, e uma "senha de app" (não a senha normal).',
+   `<div ${G2}>${fTxt('Servidor SMTP','smtp_host','placeholder="smtp.gmail.com"')}${fTxt('Porta','smtp_porta','type="number" placeholder="465"')}${fSel('Segurança','smtp_seguranca',[['ssl','SSL (porta 465)'],['starttls','STARTTLS (porta 587)'],['nenhuma','Nenhuma']],CFG.smtp_seguranca||'ssl')}${fTxt('Usuário de login','smtp_usuario','autocomplete="off"')}<label>Senha<input name="smtp_senha" type="password" autocomplete="new-password" placeholder="${CFG.smtp_senha_definida?'•••••••• (salva — deixe vazio para manter)':''}"></label>${fTxt('E-mail remetente','smtp_remetente','placeholder="farmacia@gmail.com"')}</div>`)}<button class="btn pri">Salvar</button></form>
+  ${secao('Testar envio','Salve as configurações acima antes de testar.',`<div class="bar" style="margin:0"><input id="teste_para" type="email" placeholder="e-mail que vai receber o teste"><button class="btn" id="teste_btn">Enviar teste</button></div>`)}`}
+
+let UL=[];
+async function vUsuarios(){const U=UL=await api('usuarios'),a=ME.perfil==='admin';return `<div class="top"><div><h1>Usuários</h1>${a?'<span class="mut">Administradores precisam de e-mail para poder recuperar a senha.</span>':''}</div></div>
+ ${a?'<div class="card"><form id="uf" class="form"><label>Nome<input name="nome" required></label><label>E-mail<input name="email" type="email" placeholder="obrigatório p/ administrador"></label><label>Senha<input name="senha" type="password" minlength="4" required></label><label>Perfil<select name="perfil"><option value="operador">Operador</option><option value="admin">Administrador</option></select></label><button class="btn pri">Adicionar</button></form></div>':''}
+ <div class="card wrap"><table><thead><tr><th>Nome</th>${a?'<th>E-mail</th>':''}<th>Perfil</th><th></th></tr></thead><tbody>${U.map(u=>`<tr><td><b>${esc(u.nome)}</b></td>${a?`<td>${u.email?esc(u.email):(u.perfil==='admin'?'<span class="tag bad">sem e-mail</span>':'<span class="mut">—</span>')}</td>`:''}<td>${u.perfil}</td><td class="r">${a?`<button class="btn sm" onclick="editEmail(${u.id})">E-mail</button> <button class="btn sm" onclick="novaSenha(${u.id})">Nova senha</button>${u.id!==ME.id?` <button class="btn sm del" onclick="delUser(${u.id})">Remover</button>`:''}`:''}</td></tr>`).join('')}</tbody></table></div>`}
+function editEmail(id){const u=UL.find(x=>x.id===id),v=prompt('E-mail de '+u.nome+':',u.email||'');if(v===null)return;run(async()=>{await api('usuarios/'+id,{m:'PUT',b:{email:v}});if(id===ME.id)ME.email=v.trim().toLowerCase();go('usuarios')},'E-mail salvo.')}
+function novaSenha(id){const u=UL.find(x=>x.id===id),v=prompt('Nova senha para '+u.nome+' (mín. 4 caracteres):');if(!v)return;run(async()=>{await api('usuarios/'+id,{m:'PUT',b:{senha:v}})},'Senha alterada.')}
+function ligarUsers(){const f=$('#uf');if(f)f.onsubmit=e=>{e.preventDefault();run(async()=>{await api('usuarios',{m:'POST',b:Object.fromEntries(new FormData(f))});go('usuarios')},'Usuário adicionado.')}}
+function delUser(id){if(confirm('Remover usuário?'))run(async()=>{await api('usuarios/'+id,{m:'DELETE'});go('usuarios')},'Removido.')}
+
+/* ---------- PDV ---------- */
+const total=()=>CART.reduce((s,i)=>s+i.p.preco_venda*i.q,0);
+async function abrirPDV(){try{P=await api('produtos');CFG=await api('config')}catch(e){return toast(e.message)}
+ const el=$('#pdv');el.hidden=false;
+ 
+ const logoHtml = CFG.logo 
+    ? `<img src="${CFG.logo}" style="max-width:100px; max-height:100px; object-fit:contain;">` 
+    : LOGO_ICON.replace(/width="30" height="30"/,'width="64" height="64"').replace('<rect x="1" y="1" width="30" height="30" rx="9" fill="#fff"/>','');
+ 
+ const nomeLojaHtml = `<div class="logo-text">${esc(CFG.loja || 'FARMA<br>PDV')}</div>`;
+
+ el.innerHTML=`<div class="ph"><span>${esc(CFG.loja||'FarmaEstoque')} — PDV</span><span>Atendente: ${esc(ME.nome.toUpperCase())}</span><span><span id="rel"></span> <button class="x" id="px">✕ Sair (Esc)</button></span></div>
+ <div class="pname" id="pn">CAIXA LIVRE</div>
+ <div class="pm"><div class="pl">
+    <div class="logo" style="justify-content: center;">
+        ${logoHtml}
+        ${nomeLojaHtml}
+    </div>
+    <label>Código (ou nome)</label><input id="pc" autocomplete="off" placeholder="Bipe o código..."><label>Quantidade</label><input id="pq" type="number" min="1" value="1" class="disp"><label>Preço Unitário</label><div class="disp" id="pu">0,000</div><label>Preço Total</label><div class="disp" id="pt">0,000</div></div>
+ <div class="tb"><table><thead><tr><th>Item</th><th>Código</th><th>Descrição</th><th class="r" style="width:70px;">Qtd</th><th class="r">Preço</th><th class="r">Total</th><th></th></tr></thead><tbody id="pr"></tbody></table></div></div>
+ <div class="pb"><div class="cx" id="cx">Caixa Livre</div><div><div class="sub">Subtotal</div><div class="st" id="st">R$ 0,00</div><button class="btn pri" style="width:100%; margin-top:10px; padding:15px; font-size:20px; background:#1B7F4B; border-color:#1B7F4B;" onclick="receber()">PAGAR</button></div></div>
+ <div class="keys"><span><b>Enter</b> Adicionar</span><span><b>F2</b> Buscar produto</span><span><b>F4</b> Quantidade</span><span><b>↑↓</b> Selecionar item</span><span><b>F5</b> Remover item</span><span><b>F7</b> Cancelar venda</span><span><b>F10</b> Finalizar / Receber</span><span><b>Esc</b> Sair</span></div>`;
+ $('#px').onclick=fecharPDV;clearInterval(TIMER);const rel=()=>{const d=new Date();$('#rel')&&($('#rel').textContent=d.toLocaleTimeString('pt-BR')+' | '+d.toLocaleDateString('pt-BR'))};rel();TIMER=setInterval(rel,1000);
+ $('#pc').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();achar()}};$('#pc').oninput=prever;$('#pq').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#pc').focus()}};draw();$('#pc').focus();
+ carregarCarrinho();}
+
+function fecharPDV(){if(CART.length&&!confirm('Há uma venda em andamento. Sair mesmo assim?'))return;clearInterval(TIMER);$('#pdv').hidden=true;go('painel')}
+const busca=t=>{t=t.trim().toLowerCase();return P.find(p=>p.codigo_barras&&p.codigo_barras.toLowerCase()===t)};
+function prever(){const t=$('#pc').value.trim(),m=t.match(/^(\d+)\*(.*)$/),p=busca(m?m[2]:t);if(p){$('#pn').textContent=p.nome;$('#pu').textContent=n3(p.preco_venda);$('#pt').textContent=n3(p.preco_venda*(m?+m[1]:+$('#pq').value||1))}}
+function achar(){let t=$('#pc').value.trim();if(!t)return;let q=Math.max(1,parseInt($('#pq').value)||1);const m=t.match(/^(\d+)\*(.*)$/);if(m){q=+m[1];t=m[2]}
+ const p=busca(t);if(p)return add(p,q);const L=P.filter(x=>x.nome.toLowerCase().includes(t.toLowerCase()));if(L.length===1)return add(L[0],q);buscar(t)}
+function add(p,q){if(venc(p)){beep();return toast(p.nome+' está VENCIDO e não pode ser vendido.')}
+ const ex=CART.find(i=>i.p.id===p.id),at=ex?ex.q:0;if(at+q>p.estoque_atual){beep();return toast(`Estoque insuficiente: há ${p.estoque_atual} de ${p.nome}.`)}
+ if(ex){ex.q+=q;SEL=CART.indexOf(ex)}else{CART.push({p,q});SEL=CART.length-1}LAST={p,q};$('#pc').value='';$('#pq').value=1;draw(); salvarCarrinho();}
+function beep(){try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=300;o.start();setTimeout(()=>o.stop(),180)}catch(e){}}
+
+function draw(){
+    const t=total();
+    $('#pr').innerHTML=CART.map((i,k)=>`
+        <tr class="${k===SEL?'sel':''}" onclick="SEL=${k};draw()">
+            <td>${k+1}</td>
+            <td>${esc(i.p.codigo_barras||i.p.id)}</td>
+            <td>${esc(i.p.nome)} ${i.p.receita?'<span class="tag warn">receita</span>':''}</td>
+            <td class="r"><input type="number" min="1" value="${i.q}" style="width:60px; text-align:center; padding:4px;" onchange="mudarQtd(${k}, this.value)" onclick="event.stopPropagation()"></td>
+            <td class="r">${n3(i.p.preco_venda)}</td>
+            <td class="r"><b>${n3(i.p.preco_venda*i.q)}</b></td>
+            <td class="r"><button class="btn sm del" onclick="event.stopPropagation(); removerItem(${k})">✕</button></td>
+        </tr>
+    `).join('');
+    $('#st').textContent=brl(t);$('#cx').textContent=CART.length?'Venda em andamento':'Caixa Livre';
+    if(LAST){$('#pn').textContent=LAST.p.nome;$('#pu').textContent=n3(LAST.p.preco_venda);$('#pt').textContent=n3(LAST.p.preco_venda*LAST.q)}else{$('#pn').textContent='CAIXA LIVRE';$('#pu').textContent=$('#pt').textContent='0,000'}
+    const s=$('.tb');if(s)s.scrollTop=s.scrollHeight
+}
+
+function mudarQtd(index, val) {
+    const novaQtd = parseInt(val) || 1;
+    const item = CART[index];
+    if (novaQtd > item.p.estoque_atual) {
+        beep();
+        toast(`Estoque insuficiente: há apenas ${item.p.estoque_atual} de ${item.p.nome}.`);
+        item.q = item.p.estoque_atual;
+    } else if (novaQtd < 1) {
+        item.q = 1;
+    } else {
+        item.q = novaQtd;
+    }
+    SEL = index;
+    draw();
+    salvarCarrinho();
+}
+
+function removerItem(index) {
+    CART.splice(index, 1);
+    if (SEL >= CART.length) SEL = CART.length - 1;
+    LAST = null;
+    draw();
+    salvarCarrinho();
+}
+function buscar(t=''){const d=$('#dlg');d.innerHTML=`<h2 style="margin-bottom:10px">Buscar produto</h2><input id="bq" value="${esc(t)}" placeholder="Digite o nome (↑↓ e Enter)" autocomplete="off"><div style="max-height:320px;overflow:auto;margin:10px 0"><table id="bt"></table></div><div class="r"><button class="btn" onclick="$('#dlg').close()">Fechar</button></div>`;let s=0,L=[];
+ const f=()=>{const q=$('#bq').value.toLowerCase();L=P.filter(p=>!q||p.nome.toLowerCase().includes(q)).slice(0,30);s=Math.min(s,Math.max(0,L.length-1));$('#bt').innerHTML=L.map((p,k)=>`<tr style="cursor:pointer;${k===s?'background:#D6E6FA':''}" onclick="pick(${p.id})"><td>${esc(p.nome)}<br><span class="mut">${esc(p.laboratorio||'')} · estoque ${p.estoque_atual}</span></td><td class="r"><b>${brl(p.preco_venda)}</b></td></tr>`).join('')||'<tr><td class="empty">Nada encontrado.</td></tr>'};
+ window.pick=id=>{d.close();add(P.find(p=>p.id===id),Math.max(1,parseInt($('#pq').value)||1)||1)};d.onclose=()=>$('#pc')?.focus();
+ d.showModal();f();$('#bq').oninput=()=>{s=0;f()};$('#bq').onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();s=Math.min(s+1,L.length-1);f()}else if(e.key==='ArrowUp'){e.preventDefault();s=Math.max(0,s-1);f()}else if(e.key==='Enter'&&L[s]){e.preventDefault();pick(L[s].id)}}}
+document.addEventListener('keydown',e=>{if($('#pdv').hidden||$('#dlg').open)return;
+ if(e.key==='F2'){e.preventDefault();buscar($('#pc').value)}else if(e.key==='F4'){e.preventDefault();$('#pq').focus();$('#pq').select()}
+ else if(e.key==='F5'){e.preventDefault();if(SEL>=0){removerItem(SEL)}}
+ else if(e.key==='F7'){e.preventDefault();if(CART.length&&confirm('Cancelar toda a venda?')){CART=[];SEL=-1;LAST=null;draw();salvarCarrinho();}}
+ else if(e.key==='F10'){e.preventDefault();receber()}else if(e.key==='Escape'){fecharPDV()}
+ else if(e.key==='ArrowDown'&&CART.length){e.preventDefault();SEL=Math.min(SEL+1,CART.length-1);draw()}else if(e.key==='ArrowUp'&&CART.length){e.preventDefault();SEL=Math.max(SEL-1,0);draw()}});
+function receber(){if(!CART.length)return toast('Nenhum item na venda.');const t=+total().toFixed(2),rx=CART.some(i=>i.p.receita),d=$('#dlg');
+ d.innerHTML=`<form id="rf" style="display:grid;gap:12px"><h2 style="text-align:center">Receber pagamento</h2><div class="big">${brl(t)}</div>
+ <div class="pay">${Object.keys(FP).map((k,i)=>`<label><input type="radio" name="fp" value="${k}" ${i?'':'checked'}>${FP[k]}</label>`).join('')}</div>
+ <div id="cash"><label>Valor recebido (R$)<input name="pago" id="pg" type="number" step="0.01" min="${t}" value="${t}" style="font-size:22px;text-align:center;font-weight:700"></label><div style="text-align:center;margin-top:8px">Troco: <b id="tr" style="font-size:24px;color:var(--accd)">R$ 0,00</b></div></div>
+ ${rx?'<label style="display:flex;gap:8px;align-items:center;background:var(--warnbg);padding:10px;border-radius:10px;color:var(--warn)"><input type="checkbox" id="rx" style="width:auto"> Receita conferida (itens com tarja exigem receita)</label>':''}
+ <div id="pix_area" hidden style="text-align:center; margin-top:10px;">
+    <canvas id="qr" width="260" height="260"></canvas>
+    <div class="cp" id="cp" style="margin-top:8px;"></div>
+ </div>
+ <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" onclick="$('#dlg').close()">Voltar</button><button class="btn pri" style="padding:12px 20px" id="btn_confirmar">Confirmar (Enter)</button></div></form>`;d.showModal();d.onclose=()=>$('#pc')?.focus();
+ 
+ const pg=$('#pg'),upd=()=>{
+    const f=document.querySelector('[name=fp]:checked').value;
+    $('#cash').hidden=f!=='dinheiro';
+    if(f==='pix') {
+        $('#pix_area').hidden = false;
+        gerarPix();
+    } else {
+        $('#pix_area').hidden = true;
+    }
+    $('#tr').textContent=brl(Math.max(0,(+pg.value||0)-t));
+ };
+ 
+ const gerarPix = async () => {
+    try {
+        const r = await api('pix', { m: 'POST', b: { itens: itens() } });
+        desenharQR($('#qr'), r.payload);
+        $('#cp').textContent = r.payload;
+        window.txid_atual = r.txid;
+    } catch(e) { toast(e.message); }
+ };
+
+ document.querySelectorAll('[name=fp]').forEach(r=>r.onchange=upd);
+ pg.oninput=upd;
+ pg.select();
+ upd();
+
+ $('#rf').onsubmit=e=>{
+    e.preventDefault();
+    const f=document.querySelector('[name=fp]:checked').value;
+    const rxok=!rx||$('#rx').checked;
+    if(!rxok)return toast('Confirme a conferência da receita.');
+    
+    if(f==='pix') {
+        if(confirm('Confirme no app do banco que o PIX de '+brl(total())+' foi recebido. Finalizar a venda?')) {
+            concluir('pix', total(), rxok, window.txid_atual);
+        }
+    } else if(f==='dinheiro' && (+pg.value||0)<t) {
+        return toast('Valor recebido menor que o total.');
+    } else {
+        concluir(f, +pg.value, rxok);
+    }
+ }
+}
+const itens=()=>CART.map(i=>({produto_id:i.p.id,quantidade:i.q}));
+async function concluir(forma,pago,rx,txid){try{const itn=CART.map(i=>({...i}));const r=await api('venda',{m:'POST',b:{itens:itens(),forma,pago,receita_ok:rx,txid}});$('#dlg').close();
+ cupom(r,itn,forma,pago);CART=[];SEL=-1;LAST=null;salvarCarrinho();P=await api('produtos');draw();
+ const d=$('#dlg');d.innerHTML=`<h2 style="text-align:center;color:var(--ok)">Venda nº ${r.id} concluída ✔</h2><div class="big">${brl(r.total)}</div>${forma==='dinheiro'?`<p style="text-align:center;font-size:22px;margin:10px 0">Troco: <b>${brl(r.troco)}</b></p>`:''}<div style="display:flex;gap:8px;justify-content:center;margin-top:14px"><button class="btn" onclick="window.print()">Imprimir cupom</button><button class="btn pri" onclick="$('#dlg').close()">Nova venda</button></div>`;d.showModal();d.onclose=()=>$('#pc')?.focus()}catch(e){toast(e.message)}}
+function cupom(r,it,forma,pago){$('#cupom').innerHTML=`<div style="text-align:center"><b>${esc(CFG.loja||'FARMÁCIA')}</b><br>*** CUPOM NÃO FISCAL ***</div>${dt(new Date().toISOString().slice(0,19).replace('T',' '))} · Venda ${r.id}<br>Atendente: ${esc(ME.nome)}<hr>${it.map(i=>`${esc(i.p.nome)}<br>&nbsp;${i.q} x ${brl(i.p.preco_venda)} = ${brl(i.p.preco_venda*i.q)}<br>`).join('')}<hr><b>TOTAL ${brl(r.total)}</b><br>${FP[forma]}${forma==='dinheiro'?` · Recebido ${brl(pago)} · Troco ${brl(r.troco)}`:''}<hr>Obrigado pela preferência!`}
+/* ---------- QR Code (gerador próprio, byte mode, nível M) ---------- */
+function desenharQR(cv,txt){const m=qrMatriz(txt),n=m.length,b=4,s=Math.floor(260/(n+2*b)),w=(n+2*b)*s;cv.width=cv.height=w;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,w);g.fillStyle='#000';m.forEach((l,y)=>l.forEach((v,x)=>v&&g.fillRect((x+b)*s,(y+b)*s,s,s)))}
+const ECW=[-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28],NB=[-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49];
+function qrMatriz(txt){const by=[...new TextEncoder().encode(txt)];let v=1;const raw=v=>{let r=(16*v+128)*v+64;if(v>=2){const a=Math.floor(v/7)+2;r-=(25*a-10)*a-55;if(v>=7)r-=36}return r},cap=v=>Math.floor(raw(v)/8)-ECW[v]*NB[v];
+ for(;v<=40;v++){if(by.length+(v<10?2:3)<=cap(v))break}if(v>40)throw new Error('Texto grande demais para o QR.');
+ const bits=[],put=(x,l)=>{for(let i=l-1;i>=0;i--)bits.push((x>>>i)&1)};put(4,4);put(by.length,v<10?8:16);by.forEach(x=>put(x,8));const dc=cap(v)*8;put(0,Math.min(4,dc-bits.length));while(bits.length%8)bits.push(0);for(let p=0xEC;bits.length<dc;p^=0xEC^0x11)put(p,8);
+ const data=[];for(let i=0;i<bits.length;i+=8)data.push(parseInt(bits.slice(i,i+8).join(''),2));
+ const nb=NB[v],ec=ECW[v],tw=Math.floor(raw(v)/8),sh=nb-tw%nb,sl=Math.floor(tw/nb),rs=rsDiv(ec),blocks=[];
+ for(let i=0,k=0;i<nb;i++){const l=sl-ec+(i<sh?0:1),d=data.slice(k,k+l);k+=l;const e=rsRem(d,rs);if(i<sh)d.push(0);blocks.push(d.concat(e))}
+ const out=[];for(let i=0;i<blocks[0].length;i++)blocks.forEach((b,j)=>{if(i!==sl-ec||j>=sh)out.push(b[i])});
+ const n=v*4+17,M=[...Array(n)].map(()=>Array(n).fill(false)),F=[...Array(n)].map(()=>Array(n).fill(false)),set=(x,y,d)=>{M[y][x]=d;F[y][x]=true};
+ for(let i=0;i<n;i++){set(6,i,i%2==0);set(i,6,i%2==0)}
+ const fin=(cx,cy)=>{for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const d=Math.max(Math.abs(dx),Math.abs(dy)),x=cx+dx,y=cy+dy;if(x>=0&&x<n&&y>=0&&y<n)set(x,y,d!=2&&d!=4)}};fin(3,3);fin(n-4,3);fin(3,n-4);
+ const ap=[];if(v>1){const na=Math.floor(v/7)+2,st=v==32?26:Math.floor((v*8+na*3+5)/(na*4-4))*2;ap.push(6);for(let p=n-7;ap.length<na;p-=st)ap.splice(1,0,p)}
+ ap.forEach((a,i)=>ap.forEach((b,j)=>{if(!((i==0&&j==0)||(i==0&&j==ap.length-1)||(i==ap.length-1&&j==0)))for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)set(a+dx,b+dy,Math.max(Math.abs(dx),Math.abs(dy))!=1)}));
+ const fmt=(mk)=>{const d=(0<<3)|mk;let r=d;for(let i=0;i<10;i++)r=(r<<1)^((r>>>9)*0x537);const bt=((d<<10)|r)^0x5412,g=i=>(bt>>>i)&1==1;
+  for(let i=0;i<=5;i++)set(8,i,g(i));set(8,7,g(6));set(8,8,g(7));set(7,8,g(8));for(let i=9;i<15;i++)set(14-i,8,g(i));for(let i=0;i<8;i++)set(n-1-i,8,g(i));for(let i=8;i<15;i++)set(8,n-15+i,g(i));set(8,n-8,true)};fmt(0);
+ if(v>=7){let r=v;for(let i=0;i<12;i++)r=(r<<1)^((r>>>11)*0x1F25);const bt=(v<<12)|r;for(let i=0;i<18;i++){const c=((bt>>>i)&1)==1,a=n-11+i%3,b=Math.floor(i/3);set(a,b,c);set(b,a,c)}}
+ const bl=[];out.forEach(x=>{for(let i=7;i>=0;i--)bl.push((x>>>i)&1)});let k=0;
+ for(let r=n-1;r>=1;r-=2){if(r==6)r=5;for(let u=0;u<n;u++)for(let j=0;j<2;j++){const x=r-j,up=((r+1)&2)==0,y=up?n-1-u:u;if(!F[y][x]&&k<bl.length)M[y][x]=bl[k++]==1}}
+ const apply=mk=>{for(let y=0;y<n;y++)for(let x=0;x<n;x++){let i;switch(mk){case 0:i=(x+y)%2==0;break;case 1:i=y%2==0;break;case 2:i=x%3==0;break;case 3:i=(x+y)%3==0;break;case 4:i=(Math.floor(x/3)+Math.floor(y/2))%2==0;break;case 5:i=x*y%2+x*y%3==0;break;case 6:i=(x*y%2+x*y%3)%2==0;break;default:i=((x+y)%2+x*y%3)%2==0}if(!F[y][x]&&i)M[y][x]=!M[y][x]}};
+ let best=0,bp=1e9;for(let mk=0;mk<8;mk++){apply(mk);fmt(mk);const p=pen(M,n);if(p<bp){bp=p;best=mk}apply(mk)}apply(best);fmt(best);return M}
+function gmul(x,y){let z=0;for(let i=7;i>=0;i--){z=(z<<1)^((z>>>7)*0x11D);z^=((y>>>i)&1)*x}return z}
+function rsDiv(d){const r=Array(d).fill(0);r[d-1]=1;let root=1;for(let i=0;i<d;i++){for(let j=0;j<d;j++){r[j]=gmul(r[j],root);if(j+1<d)r[j]^=r[j+1]}root=gmul(root,2)}return r}
+function rsRem(data,div){const r=Array(div.length).fill(0);data.forEach(b=>{const f=b^r.shift();r.push(0);div.forEach((c,i)=>r[i]^=gmul(c,f))});return r}
+function pen(M,n){let res=0;const run=(a)=>{let s=0,c=1;for(let i=1;i<=a.length;i++){if(i<a.length&&a[i]==a[i-1])c++;else{if(c>=5)s+=c-2;c=1}}return s};
+ for(let y=0;y<n;y++){res+=run(M[y]);res+=run(M.map(r=>r[y]))}
+ for(let y=0;y<n-1;y++)for(let x=0;x<n-1;x++)if(M[y][x]==M[y][x+1]&&M[y][x]==M[y+1][x]&&M[y][x]==M[y+1][x+1])res+=3;
+ const pat=[1,0,1,1,1,0,1,0,0,0,0],pr=a=>{let s=0;for(let i=0;i+11<=a.length;i++){const w=a.slice(i,i+11).map(Number);if(w.every((v,j)=>v==pat[j])||w.every((v,j)=>v==pat[10-j]))s+=40}return s};
+ for(let y=0;y<n;y++){res+=pr(M[y]);res+=pr(M.map(r=>r[y]))}
+ let d=0;M.forEach(r=>r.forEach(v=>d+=v));res+=(Math.ceil(Math.abs(d*20-n*n*10)/(n*n))-1)*10;return res}
+boot();
+</script></body></html>

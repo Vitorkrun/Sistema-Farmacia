@@ -1,0 +1,25 @@
+FARMAESTOQUE - como usar
+
+1. Instale o Python 3.8+ (python.org). No Windows, marque "Add Python to PATH".
+2. Descompacte esta pasta.
+3. Windows: dois cliques em iniciar.bat | Linux/Mac: ./iniciar.sh
+4. O navegador abre em http://127.0.0.1:8000
+5. No primeiro acesso, crie o usuario administrador (senha com no minimo 4 caracteres).
+6. Para parar: feche a janela preta ou aperte Ctrl+C.
+
+PRIMEIROS PASSOS
+- Produtos > "Carregar exemplos" para testar com produtos ficticios.
+- Configuracoes: informe a chave PIX da farmacia, nome do beneficiario e cidade.
+
+PDV (caixa): Enter adiciona | F2 busca | F4 quantidade | F5 remove item | F7 cancela venda | F10 recebe | Esc sai.
+Digite 3*codigo para vender 3 unidades de uma vez.
+
+PIX: o sistema gera o QR Code e o "copia e cola" no padrao do Banco Central, com o valor da venda.
+A confirmacao e manual: o atendente confere o recebimento no app do banco e clica em "Pagamento recebido".
+
+Medicamentos vencidos nao podem ser vendidos. Itens com "receita" exigem conferencia ao receber.
+O cupom e NAO FISCAL (nao substitui nota fiscal).
+
+Os dados ficam em farmacia.db (criado automaticamente). Para backup, copie esse arquivo.
+Outros aparelhos da rede: Windows (PowerShell): $env:HOST="0.0.0.0"; python servidor.py
+                          Linux/Mac: HOST=0.0.0.0 python3 servidor.py  -> http://IP-DO-COMPUTADOR:8000
